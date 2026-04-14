@@ -8,5 +8,6 @@ data class HistoryEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val word: String,
+    val score: Int,
     val timestamp: Long = System.currentTimeMillis()
 )

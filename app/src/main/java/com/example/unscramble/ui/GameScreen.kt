@@ -43,6 +43,9 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,11 +59,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unscramble.R
+import com.example.unscramble.data.HistoryEntity
 import com.example.unscramble.ui.theme.UnscrambleTheme
 
 @Composable
 fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
+    var showHistoryDialog by remember { mutableStateOf(false) }
     val gameUiState by gameViewModel.uiState.collectAsState()
+    val historyList by gameViewModel.historyList.collectAsState()
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
 
     Column(
@@ -116,9 +122,27 @@ fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
                     fontSize = 16.sp
                 )
             }
+
+            OutlinedButton(
+                onClick = { showHistoryDialog = true },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(R.string.history),
+                    fontSize = 16.sp
+                )
+            }
+
         }
 
         GameStatus(score = gameUiState.score, modifier = Modifier.padding(20.dp))
+
+        if (showHistoryDialog) {
+            HistoryDialog(
+                historyList = historyList,
+                onDismiss = { showHistoryDialog = false }
+            )
+        }
 
         if (gameUiState.isGameOver) {
             FinalScoreDialog(
@@ -213,9 +237,31 @@ fun GameLayout(
     }
 }
 
-/*
- * Creates and shows an AlertDialog with final score.
- */
+@Composable
+private fun HistoryDialog(
+    historyList: List<HistoryEntity>,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("History") },
+        text = {
+            Column {
+                historyList.forEachIndexed { index, item ->
+                    Text(
+                        text = "${index + 1}. ${item.word} - Score: ${item.score}"
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    )
+}
+
 @Composable
 private fun FinalScoreDialog(
     score: Int,
