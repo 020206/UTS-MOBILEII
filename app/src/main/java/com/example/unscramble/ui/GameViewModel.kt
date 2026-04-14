@@ -73,6 +73,9 @@ class GameViewModel : ViewModel() {
             // and call updateGameState() to prepare the game for next round
             val updatedScore = _uiState.value.score.plus(SCORE_INCREASE)
             updateGameState(updatedScore)
+
+            val updateHistory = _uiState.value.correctAnswerHistory
+
         } else {
             // User's guess is wrong, show an error
             _uiState.update { currentState ->
